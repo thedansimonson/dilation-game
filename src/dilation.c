@@ -1,3 +1,4 @@
+#include "raylib.h"
 #include "dilation.h"
 
 
@@ -34,6 +35,11 @@ void free_grid(Grid *grid)
 
 }
 
+void draw_grid(Grid *grid, int width, int height)
+{
+    
+}
+
 
 /************************
  * tile stuff down here *
@@ -64,3 +70,32 @@ void advance_tile(Tile* tile)
     }
 }
 
+void draw_tile(Tile* tile, Vector2 pos, float width)
+{
+    // TODO: This shit is calculated for every tile. Optimize at grid level!
+    // Should only be done once and then just offset by pos. All our hexes
+    // will always be the same size. 
+    const float height = width * 2 / SQRT_3;
+    const float h_half    = height / 2;
+    const float h_quarter = height / 4;
+    const float w_half    = width  / 2;
+    //const float w_quarter = width  / 4;
+
+
+    //clockwise, starting with 12 to 2
+    // not even sure if these are technically right, but it doesn't matter
+    const Vector2 midnight = ((Vector2) {h_half, 0} )          + pos;
+    const Vector2 two      = ((Vector2) {h_quarter,   w_half}) + pos;
+    const Vector2 four     = ((Vector2) {-h_quarter,  w_half}) + pos;
+    const Vector2 six      = ((Vector2) {-h_half, 0})          + pos;
+    const Vector2 eight    = ((Vector2) {-h_quarter, -w_half}) + pos;
+    const Vector2 ten      = ((Vector2) { h_quarter, -w_half}) + pos;
+
+    CLITERAL(Color) clock_color = WHITE;
+    DrawTriangle(midnight, two, pos, clock_color);
+    DrawTriangle(two, four, pos, clock_color);
+    DrawTriangle(four, six, pos, clock_color);
+    DrawTriangle(six, eight, pos, clock_color);
+    DrawTriangle(eight, ten, pos, clock_color);
+    DrawTriangle(ten, midnight, pos, clock_color);
+}

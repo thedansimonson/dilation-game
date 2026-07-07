@@ -70,7 +70,7 @@ int main(void)
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "raylib gamejam template");
+    InitWindow(screenWidth, screenHeight, "Dilation");
     
     // TODO: Load resources / Initialize variables at this point
     
@@ -115,6 +115,7 @@ void UpdateDrawFrame(void)
     // TODO: Update variables / Implement example logic at this point
    
     frameCounter++;
+    
     //----------------------------------------------------------------------------------
 
     // Draw
@@ -122,9 +123,11 @@ void UpdateDrawFrame(void)
     // Render game screen to a texture, 
     // it could be useful for scaling or further shader postprocessing
     BeginTextureMode(target);
-        ClearBackground(RAYWHITE);
+        ClearBackground(DARKBROWN);
         
         // TODO: Draw your game screen here
+
+
 
         DrawRectangle(70, 90, 200, 200, BLACK);
         DrawRectangle(70 + 16, 90 + 16, 200 - 32, 200 - 32, RAYWHITE);

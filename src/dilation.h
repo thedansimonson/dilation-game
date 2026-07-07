@@ -1,4 +1,5 @@
 #define MAX_HOURS 12
+#define SQRT_3 1.73205080
 
 typedef struct Tile {
     int tix_per_hour; 
@@ -34,4 +35,8 @@ typedef struct CubicCoord {
  ************************/
 
 // dilation.h
+void init_grid(Grid *);
+void free_grid(Grid *);
+
+void init_tile(Tile *);
 void advance_tile(Tile *);
