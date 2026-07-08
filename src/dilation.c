@@ -1,5 +1,8 @@
 #include "raylib.h"
+#include "raymath.h"
 #include "dilation.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 
 /************************
@@ -8,13 +11,13 @@
 
 void init_grid(Grid* grid)
 {
-    grid->cells = malloc(sizeof(Tile **) * grid->num_qs);
+    grid->cells = malloc(sizeof(Tile ***) * grid->num_qs);
     for (int i = 0; i < grid->num_qs; i++)
     {
-        grid->cells[i] = malloc(sizeof(Tile *) * grid->num_rs);
+        grid->cells[i] = malloc(sizeof(Tile **) * grid->num_rs);
         for (int j = 0; j < grid->num_rs; j++)
         {
-            grid->cells[i][j] = malloc(sizeof(Tile));
+            grid->cells[i][j] = malloc(sizeof(Tile *));
             init_tile(grid->cells[i][j]);
         }
     }
@@ -27,7 +30,7 @@ void free_grid(Grid *grid)
     {
         for (int j = 0; j < grid->num_rs; j++)
         {
-            free(grid->cells[i][j]);
+            free(&grid->cells[i][j]);
         }
         free(grid->cells[i]);
     }
@@ -84,18 +87,19 @@ void draw_tile(Tile* tile, Vector2 pos, float width)
 
     //clockwise, starting with 12 to 2
     // not even sure if these are technically right, but it doesn't matter
-    const Vector2 midnight = ((Vector2) {h_half, 0} )          + pos;
-    const Vector2 two      = ((Vector2) {h_quarter,   w_half}) + pos;
-    const Vector2 four     = ((Vector2) {-h_quarter,  w_half}) + pos;
-    const Vector2 six      = ((Vector2) {-h_half, 0})          + pos;
-    const Vector2 eight    = ((Vector2) {-h_quarter, -w_half}) + pos;
-    const Vector2 ten      = ((Vector2) { h_quarter, -w_half}) + pos;
+    const Vector2 midnight = Vector2Add(((Vector2) {h_half, 0} ), pos);
+    const Vector2 two      = Vector2Add(((Vector2) {h_quarter,   w_half}), pos);
+    const Vector2 four     = Vector2Add(((Vector2) {-h_quarter,  w_half}), pos);
+    const Vector2 six      = Vector2Add(((Vector2) {-h_half, 0})         , pos);
+    const Vector2 eight    = Vector2Add(((Vector2) {-h_quarter, -w_half}), pos);
+    const Vector2 ten      = Vector2Add(((Vector2) { h_quarter, -w_half}), pos);
+    
+    Color clock_color = RAYWHITE;
+    DrawTriangle(midnight, pos, two, clock_color);
+    DrawTriangle(two,   pos, four, clock_color);
+    DrawTriangle(four,  pos, six, clock_color);
+    DrawTriangle(six,   pos,  eight, clock_color);
+    DrawTriangle(eight, pos, ten,   clock_color);
+    DrawTriangle(ten,   pos, midnight, clock_color);
 
-    CLITERAL(Color) clock_color = WHITE;
-    DrawTriangle(midnight, two, pos, clock_color);
-    DrawTriangle(two, four, pos, clock_color);
-    DrawTriangle(four, six, pos, clock_color);
-    DrawTriangle(six, eight, pos, clock_color);
-    DrawTriangle(eight, ten, pos, clock_color);
-    DrawTriangle(ten, midnight, pos, clock_color);
 }

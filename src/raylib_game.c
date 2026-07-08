@@ -10,6 +10,7 @@
 ********************************************************************************************/
 
 #include "raylib.h"
+#include "dilation.h"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>      // Emscripten library
@@ -114,7 +115,6 @@ void UpdateDrawFrame(void)
     //----------------------------------------------------------------------------------
     // TODO: Update variables / Implement example logic at this point
    
-    frameCounter++;
     
     //----------------------------------------------------------------------------------
 
@@ -126,19 +126,12 @@ void UpdateDrawFrame(void)
         ClearBackground(DARKBROWN);
         
         // TODO: Draw your game screen here
+    DrawTriangle((Vector2) { 100, 100}, 
+                 (Vector2) { 0, 0}, 
+                (Vector2) { 0, 100}, WHITE);
 
-
-
-        DrawRectangle(70, 90, 200, 200, BLACK);
-        DrawRectangle(70 + 16, 90 + 16, 200 - 32, 200 - 32, RAYWHITE);
-        DrawText("raylib", 70 + 200 - MeasureText("raylib", 40) - 32, 90 + 200 - 40 - 24, 40, BLACK);
-
-        DrawText("6.x", 290, 90 - 26, 280, BLACK);
-        DrawText("GAMEJAM", 70, 90 + 210, 120, MAROON);
-
-        if ((frameCounter/20)%2) DrawText("are you ready?", 160, 500, 50, BLACK);
-        
-        DrawRectangleLinesEx((Rectangle){ 0, 0, screenWidth, screenHeight }, 16, BLACK);
+        Tile test_tile = (Tile) {1200, 2, 10, true};
+        draw_tile(&test_tile, (Vector2) {720/2, 720/2} , 100);
         
     EndTextureMode();
     

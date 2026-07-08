@@ -1,3 +1,6 @@
+#include "raylib.h"
+#include "raymath.h"
+
 #define MAX_HOURS 12
 #define SQRT_3 1.73205080
 
@@ -12,7 +15,7 @@ typedef struct Tile {
 
 
 typedef struct Grid {
-    Tile **cells; //cells[q][r]
+    Tile ***cells; //cells[q][r]
     int num_qs;
     int num_rs; 
 
@@ -40,3 +43,4 @@ void free_grid(Grid *);
 
 void init_tile(Tile *);
 void advance_tile(Tile *);
+void draw_tile(Tile*, Vector2, float);
