@@ -105,6 +105,8 @@ int main(void)
     return 0;
 }
 
+static Tile test_tile = (Tile) {60, 2, 10, true, OP_ADD, false};
+
 //--------------------------------------------------------------------------------------------
 // Module Functions Definition
 //--------------------------------------------------------------------------------------------
@@ -114,8 +116,8 @@ void UpdateDrawFrame(void)
     // Update
     //----------------------------------------------------------------------------------
     // TODO: Update variables / Implement example logic at this point
-   
     
+    advance_tile(&test_tile);
     //----------------------------------------------------------------------------------
 
     // Draw
@@ -130,7 +132,6 @@ void UpdateDrawFrame(void)
                  (Vector2) { 0, 0}, 
                 (Vector2) { 0, 100}, WHITE);
 
-        Tile test_tile = (Tile) {1200, 2, 10, true};
         draw_tile(&test_tile, (Vector2) {720/2, 720/2} , 100);
         
     EndTextureMode();
