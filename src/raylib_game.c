@@ -51,7 +51,9 @@ static const int screenWidth = 720;
 static const int screenHeight = 720;
 
 static RenderTexture2D target = { 0 };  // Render texture to render our game
-static int frameCounter = 0;
+
+static Grid active_grid = { 0 };
+static Tile test_tile = (Tile) {60, 2, 10, true, OP_ADD, false};
 
 // TODO: Define global variables here, recommended to make them static
 
@@ -85,6 +87,11 @@ int main(void)
 #else
     SetTargetFPS(60);     // Set our game frames-per-second
     //--------------------------------------------------------------------------------------
+    
+    active_grid.num_qs = 2;
+    active_grid.num_rs = 1;
+    init_grid(&active_grid);
+    memcpy(active_grid.cells[0][0], &test_tile, sizeof(Tile)); 
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button
@@ -105,7 +112,6 @@ int main(void)
     return 0;
 }
 
-static Tile test_tile = (Tile) {60, 2, 10, true, OP_ADD, false};
 
 //--------------------------------------------------------------------------------------------
 // Module Functions Definition
@@ -117,7 +123,8 @@ void UpdateDrawFrame(void)
     //----------------------------------------------------------------------------------
     // TODO: Update variables / Implement example logic at this point
     
-    advance_tile(&test_tile);
+    //advance_tile(&test_tile);
+    update_grid(&active_grid);
     //----------------------------------------------------------------------------------
 
     // Draw
@@ -128,11 +135,9 @@ void UpdateDrawFrame(void)
         ClearBackground(DARKBROWN);
         
         // TODO: Draw your game screen here
-    DrawTriangle((Vector2) { 100, 100}, 
-                 (Vector2) { 0, 0}, 
-                (Vector2) { 0, 100}, WHITE);
-
-        draw_tile(&test_tile, (Vector2) {720/2, 720/2} , 100);
+        
+        //draw_tile(&test_tile, (Vector2) {720/2, 720/2} , 600);
+        draw_grid(&active_grid, 200, 200, 400);
         
     EndTextureMode();
     

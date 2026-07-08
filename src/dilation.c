@@ -31,7 +31,7 @@ void free_grid(Grid *grid)
     {
         for (int j = 0; j < grid->num_rs; j++)
         {
-            free(&grid->cells[i][j]);
+            free(grid->cells[i][j]);
         }
         free(grid->cells[i]);
     }
@@ -39,9 +39,34 @@ void free_grid(Grid *grid)
 
 }
 
-void draw_grid(Grid *grid, int width, int height)
+void update_grid(Grid *grid)
 {
     
+    for (int i = 0; i < grid->num_qs; i++)
+    {
+        for (int j = 0; j < grid->num_rs; j++)
+        {
+            advance_tile(grid->cells[i][j]);
+        }
+    }
+}
+
+void draw_grid(Grid *grid, int pos_x, int pos_y, int width)
+{
+    // since "height" is indirectly determined by width @ grid size,
+    // there's no need for a height param. 
+    
+    const float cell_width = width / grid->num_qs;
+    
+    Vector2 tile_pos = { 0 };
+    for (int i = 0; i < grid->num_qs; i++)
+    {
+        for (int j = 0; j < grid->num_rs; j++)
+        {
+            tile_pos = (Vector2) { pos_x + i*cell_width, pos_y + j*cell_width };
+            draw_tile(grid->cells[i][j], tile_pos, cell_width);
+        }
+    }
 }
 
 
@@ -98,8 +123,10 @@ void draw_tile(Tile* tile, Vector2 pos, float width)
     
     Color clock_color = DARKGRAY;
     if (tile->enabled)
-        clock_color = RAYWHITE;
-    
+    {
+        if (tile->selected) clock_color = PALEYELLOW;
+        else clock_color = RAYWHITE;
+    }
     // background
     DrawTriangle(midnight, pos, two, clock_color);
     DrawTriangle(two,      pos, four, clock_color);

@@ -10,6 +10,8 @@
 #define OP_DIV 3
 #define OP_MOD 4
 
+#define PALEYELLOW     CLITERAL(Color){ 253, 249, 128, 255 }
+
 typedef struct Tile {
     int tix_per_hour; 
     int time_hours;
@@ -51,6 +53,8 @@ typedef struct CubicCoord {
 // dilation.h
 void init_grid(Grid *);
 void free_grid(Grid *);
+void update_grid(Grid *);
+void draw_grid(Grid *, int, int, int);
 
 void init_tile(Tile *);
 void advance_tile(Tile *);
