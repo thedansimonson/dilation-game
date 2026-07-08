@@ -4,12 +4,23 @@
 #define MAX_HOURS 12
 #define SQRT_3 1.73205080
 
+#define OP_ADD 0
+#define OP_SUB 1
+#define OP_MUL 2
+#define OP_DIV 3
+#define OP_MOD 4
+
 typedef struct Tile {
     int tix_per_hour; 
     int time_hours;
     int time_tix;
 
+
     bool enabled;
+
+    int operation;
+
+    bool selected; 
 
 } Tile;
 
