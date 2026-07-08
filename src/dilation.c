@@ -87,19 +87,20 @@ void draw_tile(Tile* tile, Vector2 pos, float width)
 
     //clockwise, starting with 12 to 2
     // not even sure if these are technically right, but it doesn't matter
-    const Vector2 midnight = Vector2Add(((Vector2) {h_half, 0} ), pos);
-    const Vector2 two      = Vector2Add(((Vector2) {h_quarter,   w_half}), pos);
-    const Vector2 four     = Vector2Add(((Vector2) {-h_quarter,  w_half}), pos);
-    const Vector2 six      = Vector2Add(((Vector2) {-h_half, 0})         , pos);
-    const Vector2 eight    = Vector2Add(((Vector2) {-h_quarter, -w_half}), pos);
-    const Vector2 ten      = Vector2Add(((Vector2) { h_quarter, -w_half}), pos);
+    const Vector2 midnight = Vector2Add(((Vector2) {0, h_half} ), pos);
+    const Vector2 two      = Vector2Add(((Vector2) {w_half, h_quarter}), pos);
+    const Vector2 four     = Vector2Add(((Vector2) {w_half, -h_quarter}), pos);
+    const Vector2 six      = Vector2Add(((Vector2) {0, -h_half})         , pos);
+    const Vector2 eight    = Vector2Add(((Vector2) {-w_half, -h_quarter}), pos);
+    const Vector2 ten      = Vector2Add(((Vector2) {-w_half, h_quarter}), pos);
     
     Color clock_color = RAYWHITE;
-    DrawTriangle(midnight, pos, two, clock_color);
-    DrawTriangle(two,   pos, four, clock_color);
-    DrawTriangle(four,  pos, six, clock_color);
-    DrawTriangle(six,   pos,  eight, clock_color);
-    DrawTriangle(eight, pos, ten,   clock_color);
-    DrawTriangle(ten,   pos, midnight, clock_color);
+    DrawTriangle(pos, midnight, two, clock_color);
+    DrawTriangle(pos, two,   four, clock_color);
+    DrawTriangle(pos, four,  six, clock_color);
+    DrawTriangle(pos, six,   eight, clock_color);
+    DrawTriangle(pos, eight, ten,   clock_color);
+    DrawTriangle(pos, ten,   midnight, clock_color);
+
 
 }
