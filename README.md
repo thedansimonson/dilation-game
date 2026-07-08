@@ -47,13 +47,16 @@ This template has been created to be used with raylib (www.raylib.com) and it's 
 _Copyright (c) 2014-2026 Ramon Santamaria ([@raysan5](https://github.com/raysan5))_
 -----------------------------------
 
-## $(Game Title)
+## Dilation 
 
 ![$(Game Title)](screenshots/screenshot000.png "$(Game Title)")
 
 ### Description
 
-$(Your Game Description)
+Dilation is a puzzle game where *time is of the essence.* Player must merge
+hexagonal clocks together when they read the same time, 
+but the clocks themselves tick at different rates. 
+Merging clocks changes their tick rate. 
 
 ### Features
 
