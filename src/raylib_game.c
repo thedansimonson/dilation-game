@@ -202,6 +202,7 @@ void UpdateDrawFrame(void)
                 // are the tiles adjacent?
                 float dist = cube_distance(selected_tile_pos, object_tile_pos);
                 bool adjacent = dist < 1.0001 && dist > 0.99;
+                bool same_as_selected = dist < 0.001;
 
                 // is the tile enabled?
 
@@ -237,13 +238,19 @@ void UpdateDrawFrame(void)
                         
                     }
                     printf("obj %i\n", object_tile->tix_per_hour);
-                }
-                    
 
-                // de-select tile
-                selected_tile->selected = false;
-                selected_tile = NULL;
-                selected_tile_pos = axial_to_cube(NULL_AX);
+                    // de-select tile
+                    selected_tile->selected = false;
+                    selected_tile = NULL;
+                    selected_tile_pos = axial_to_cube(NULL_AX);
+                }
+                else if (same_as_selected) 
+                {
+                    // de-select tile
+                    selected_tile->selected = false;
+                    selected_tile = NULL;
+                    selected_tile_pos = axial_to_cube(NULL_AX);
+                }
             }
         }
         else
