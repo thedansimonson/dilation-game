@@ -133,6 +133,23 @@ AxCoord axial_round(AxCoord ax)
     return cube_to_axial(cube_round(axial_to_cube(ax)));
 }
 
+CubicCoord cube_subtract(CubicCoord a, CubicCoord b)
+{
+    return (CubicCoord) {a.q - b.q, a.r - b.r, a.s - b.s}; 
+}
+
+float cube_distance(CubicCoord a, CubicCoord b)
+{
+    CubicCoord raw_delta = cube_subtract(a,b);
+    CubicCoord delta = (CubicCoord) { abs(raw_delta.q), 
+                                      abs(raw_delta.r),
+                                      abs(raw_delta.s) };
+    float max_dim = delta.q >= delta.r && delta.q >= delta.s? delta.q :
+                    delta.r >= delta.q && delta.r >= delta.s? delta.r :
+                                                              delta.s;
+    return max_dim;
+}
+
 /************************
  * tile stuff down here *
  ************************/
@@ -200,7 +217,7 @@ void draw_tile(Tile* tile, Vector2 pos, float width)
 
     // border
     Color border_color = BLACK;
-    if (tile->selected) border_color = YELLOW;
+    //if (tile->selected) border_color = YELLOW;
     DrawLine(midnight.x, midnight.y, two.x, two.y, border_color);
     DrawLine(two.x, two.y, four.x, four.y, border_color);
     DrawLine(four.x, four.y, six.x, six.y, border_color);

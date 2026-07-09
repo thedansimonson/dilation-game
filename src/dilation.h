@@ -12,6 +12,9 @@
 
 #define PALEYELLOW     CLITERAL(Color){ 253, 249, 128, 255 }
 
+// this should always be out of the grid space
+#define NULL_AX (AxCoord) {-2, -2}
+
 typedef struct Tile {
     int tix_per_hour; 
     int time_hours;
@@ -60,6 +63,11 @@ void free_grid(Grid *);
 void update_grid(Grid *);
 void draw_grid(Grid *, int, int, int);
 AxCoord pixel_to_pointy(PixelCoord, Grid *, float);
+CubicCoord axial_to_cube(AxCoord);
+AxCoord cube_to_axial(CubicCoord);
+CubicCoord cube_round(CubicCoord);
+AxCoord axial_round(AxCoord);
+float cube_distance(CubicCoord, CubicCoord);
 
 void init_tile(Tile *);
 void advance_tile(Tile *);
