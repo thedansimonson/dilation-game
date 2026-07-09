@@ -1,1 +1,20 @@
 https://www.redblobgames.com/grids/hexagons/
+
+
+Todo:
+* selection
+* second selection
+* merging
+* operators and displaying operators
+
+* levels
+
+* start menu
+
+* music??
+* sfx???
+
+* smooth pixels?
+    * https://www.raylib.com/examples/core/loader.html?name=core_smooth_pixelperfect
+* animation
+    * slides
