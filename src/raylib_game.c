@@ -92,8 +92,8 @@ int main(void)
     SetTargetFPS(60);     // Set our game frames-per-second
     //--------------------------------------------------------------------------------------
     
-    active_grid.num_qs = 4;
-    active_grid.num_rs = 4;
+    active_grid.num_qs = 8;
+    active_grid.num_rs = 8;
     init_grid(&active_grid);
     memcpy(active_grid.cells[0][0], &test_tile, sizeof(Tile)); 
 
@@ -146,8 +146,9 @@ void UpdateDrawFrame(void)
         printf("mouse_pos: < %f %f > ", mouse_pos.x, mouse_pos.y);
         AxCoord ax_pos = pixel_to_pointy((PixelCoord) { (int) mouse_pos.x - GRIDPOS_X, 
                                                         (int) mouse_pos.y - GRIDPOS_Y},
-                                         GRIDSIZE/4);
-        printf("ax_pos: < %i %i > \n", ax_pos.q, ax_pos.r);
+                                         &active_grid,
+                                         GRIDSIZE);
+        printf("ax_pos: < %f %f > \n", ax_pos.q, ax_pos.r);
     }
 
     //advance_tile(&test_tile);

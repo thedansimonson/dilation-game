@@ -35,14 +35,14 @@ typedef struct Grid {
 } Grid;
 
 typedef struct AxCoord {
-    int q;
-    int r;
+    float q;
+    float r;
 } AxCoord;
 
 typedef struct CubicCoord {
-    int q;
-    int r;
-    int s;
+    float q;
+    float r;
+    float s;
 } CubicCoord;
 
 typedef struct PixelCoord {
@@ -59,7 +59,7 @@ void init_grid(Grid *);
 void free_grid(Grid *);
 void update_grid(Grid *);
 void draw_grid(Grid *, int, int, int);
-AxCoord pixel_to_pointy(PixelCoord, float);
+AxCoord pixel_to_pointy(PixelCoord, Grid *, float);
 
 void init_tile(Tile *);
 void advance_tile(Tile *);

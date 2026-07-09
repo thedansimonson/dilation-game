@@ -75,15 +75,62 @@ void draw_grid(Grid *grid, int pos_x, int pos_y, int width)
     }
 }
 
-AxCoord pixel_to_pointy(PixelCoord pix, float size)
+AxCoord pixel_to_pointy(PixelCoord pix, Grid *grid, float width)
 {
     AxCoord output = { 0 };
-    float x = pix.x / size;
-    float y = pix.y / size;
 
-    output.q = (int)(SQRT_3/3 * x - 1/3 * y);
-    output.r = (int)(2/3 * y);
+    const float cell_width = width / grid->num_qs;
+    const float cw2 = cell_width / 2;
+    const float cell_height = cell_width * 2 / SQRT_3;
+    const float ch34 = cell_height * 3 / 4;
+
+    float x = ((float) pix.x) + cell_width*SQRT_3;
+    float y = ((float) pix.y) + ch34/2; //- ch34;
+    
+    printf("conversion < %f %f > ", x, y);
+
+    output.q = (int)(x/cell_width - y / 2 / ch34) - 1;
+    output.r = (int)(y/ch34);
     return output;
+}
+
+CubicCoord axial_to_cube(AxCoord ax)
+{
+    CubicCoord output = { 0 };
+    output.q = ax.q;
+    output.r = ax.r;
+    output.s = -ax.q-ax.r;
+    return output;
+}
+
+AxCoord cube_to_axial(CubicCoord cube)
+{
+    AxCoord output = { 0 };
+    output.q = cube.q;
+    output.r = cube.r;
+    return output;
+}
+
+CubicCoord cube_round(CubicCoord ax)
+{
+    float q = round(ax.q);
+    float r = round(ax.r);
+    float s = round(ax.s);
+
+    int q_diff = abs(q - ax.q);
+    int r_diff = abs(r - ax.r);
+    int s_diff = abs(s - ax.s);
+
+    if (q_diff > r_diff && q_diff > s_diff) q = -r-s;
+    else if (r_diff > s_diff) r = -q-s;
+    else s = -q-r;
+
+    return (CubicCoord) {q, r, s};
+}
+
+AxCoord axial_round(AxCoord ax)
+{
+    return cube_to_axial(cube_round(axial_to_cube(ax)));
 }
 
 /************************
