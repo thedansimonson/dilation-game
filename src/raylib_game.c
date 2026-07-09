@@ -50,10 +50,14 @@ typedef enum {
 static const int screenWidth = 720;
 static const int screenHeight = 720;
 
+const int GRIDSIZE = 400;
+
 static RenderTexture2D target = { 0 };  // Render texture to render our game
 
 static Grid active_grid = { 0 };
 static Tile test_tile = (Tile) {60, 2, 10, true, OP_ADD, false};
+
+static int round_score = 0;
 
 // TODO: Define global variables here, recommended to make them static
 
@@ -88,10 +92,18 @@ int main(void)
     SetTargetFPS(60);     // Set our game frames-per-second
     //--------------------------------------------------------------------------------------
     
-    active_grid.num_qs = 2;
-    active_grid.num_rs = 1;
+    active_grid.num_qs = 4;
+    active_grid.num_rs = 4;
     init_grid(&active_grid);
     memcpy(active_grid.cells[0][0], &test_tile, sizeof(Tile)); 
+
+    test_tile = (Tile) {120, 4, 10, true, OP_ADD, false};
+    memcpy(active_grid.cells[1][0], &test_tile, sizeof(Tile));
+
+    test_tile = (Tile) {1, 6, 10, true, OP_ADD, false};
+    memcpy(active_grid.cells[3][3], &test_tile, sizeof(Tile));
+
+    round_score = 400000;
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button
@@ -123,8 +135,24 @@ void UpdateDrawFrame(void)
     //----------------------------------------------------------------------------------
     // TODO: Update variables / Implement example logic at this point
     
+    const int GRIDPOS_X = 200;
+    const int GRIDPOS_Y = 200;
+
+    round_score--;
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        Vector2 mouse_pos = GetMousePosition();
+        printf("mouse_pos: < %f %f > ", mouse_pos.x, mouse_pos.y);
+        AxCoord ax_pos = pixel_to_pointy((PixelCoord) { (int) mouse_pos.x - GRIDPOS_X, 
+                                                        (int) mouse_pos.y - GRIDPOS_Y},
+                                         GRIDSIZE/4);
+        printf("ax_pos: < %i %i > \n", ax_pos.q, ax_pos.r);
+    }
+
     //advance_tile(&test_tile);
     update_grid(&active_grid);
+
     //----------------------------------------------------------------------------------
 
     // Draw
@@ -134,10 +162,8 @@ void UpdateDrawFrame(void)
     BeginTextureMode(target);
         ClearBackground(DARKBROWN);
         
-        // TODO: Draw your game screen here
         
-        //draw_tile(&test_tile, (Vector2) {720/2, 720/2} , 600);
-        draw_grid(&active_grid, 200, 200, 400);
+        draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
         
     EndTextureMode();
     

@@ -57,18 +57,34 @@ void draw_grid(Grid *grid, int pos_x, int pos_y, int width)
     // there's no need for a height param. 
     
     const float cell_width = width / grid->num_qs;
+    const float cw2 = cell_width / 2;
+    const float cell_height = cell_width * 2 / SQRT_3;
+    const float ch34 = cell_height * 3 / 4;
     
     Vector2 tile_pos = { 0 };
     for (int i = 0; i < grid->num_qs; i++)
     {
         for (int j = 0; j < grid->num_rs; j++)
         {
-            tile_pos = (Vector2) { pos_x + i*cell_width, pos_y + j*cell_width };
+            // TODO: THIS TILE POS IS WRONG
+            // LOOK AT THE FUCKING TUTORIAL YOU SCHMUCK
+            tile_pos = (Vector2) { pos_x + i*cell_width + j*cw2, 
+                                   pos_y + j*ch34 };
             draw_tile(grid->cells[i][j], tile_pos, cell_width);
         }
     }
 }
 
+AxCoord pixel_to_pointy(PixelCoord pix, float size)
+{
+    AxCoord output = { 0 };
+    float x = pix.x / size;
+    float y = pix.y / size;
+
+    output.q = (int)(SQRT_3/3 * x - 1/3 * y);
+    output.r = (int)(2/3 * y);
+    return output;
+}
 
 /************************
  * tile stuff down here *

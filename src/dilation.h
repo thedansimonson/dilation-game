@@ -45,6 +45,10 @@ typedef struct CubicCoord {
     int s;
 } CubicCoord;
 
+typedef struct PixelCoord {
+    int x;
+    int y;
+} PixelCoord;
 
 /************************
  * Function Definitions *
@@ -55,6 +59,7 @@ void init_grid(Grid *);
 void free_grid(Grid *);
 void update_grid(Grid *);
 void draw_grid(Grid *, int, int, int);
+AxCoord pixel_to_pointy(PixelCoord, float);
 
 void init_tile(Tile *);
 void advance_tile(Tile *);
