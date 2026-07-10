@@ -11,6 +11,7 @@
 #define OP_MOD 4
 
 #define PALEYELLOW     CLITERAL(Color){ 253, 249, 128, 255 }
+#define GRAYOUT        CLITERAL(Color){ 64, 64, 64, 128 }
 
 // this should always be out of the grid space
 #define NULL_AX (AxCoord) {-2, -2}
@@ -53,6 +54,11 @@ typedef struct PixelCoord {
     int y;
 } PixelCoord;
 
+typedef struct Level {
+    Grid level_grid;
+    char* hint;
+} Level;
+
 /************************
  * Function Definitions *
  ************************/
@@ -68,6 +74,7 @@ AxCoord cube_to_axial(CubicCoord);
 CubicCoord cube_round(CubicCoord);
 AxCoord axial_round(AxCoord);
 float cube_distance(CubicCoord, CubicCoord);
+int count_active_tiles(Grid *);
 
 void init_tile(Tile *);
 void advance_tile(Tile *);

@@ -50,12 +50,14 @@ typedef enum {
 static const int screenWidth = 720;
 static const int screenHeight = 720;
 
-const int GRIDSIZE = 400;
+const int GRIDSIZE = 460;
 
 static RenderTexture2D target = { 0 };  // Render texture to render our game
 
 static Grid active_grid = { 0 };
 static Tile test_tile = (Tile) {60, 2, 10, true, OP_ADD, false};
+static const int GRIDPOS_X = 100;
+static const int GRIDPOS_Y = 200;
 
 // UI-related funcs
 static Tile* selected_tile = NULL;
@@ -63,6 +65,15 @@ static CubicCoord selected_tile_pos = { 0 };
 
 static bool start_score = false;
 static int round_score = 0;
+static int total_score = 0;
+
+#define NEW_GAME 0
+#define LEVEL_ACTIVE 1
+#define LEVEL_SUCCESS 2
+#define LEVEL_NEW 3
+#define GAME_OVER 4
+
+static int game_state = NEW_GAME;
 
 // TODO: Define global variables here, recommended to make them static
 
@@ -70,6 +81,7 @@ static int round_score = 0;
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
 static void UpdateDrawFrame(void);      // Update and Draw one frame
+static void UpdateDrawFrame_BetweenLevels(void);      // Update and Draw one frame
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -97,41 +109,50 @@ int main(void)
     SetTargetFPS(60);     // Set our game frames-per-second
     //--------------------------------------------------------------------------------------
     
-    active_grid.num_qs = 8;
-    active_grid.num_rs = 8;
+    active_grid.num_qs = 2;
+    active_grid.num_rs = 2;
     init_grid(&active_grid);
     memcpy(active_grid.cells[0][0], &test_tile, sizeof(Tile)); 
-
+    
+    /*
     test_tile = (Tile) {120, 4, 10, true, OP_ADD, false};
     memcpy(active_grid.cells[1][0], &test_tile, sizeof(Tile));
 
     test_tile = (Tile) {1, 6, 10, true, OP_ADD, false};
     memcpy(active_grid.cells[3][3], &test_tile, sizeof(Tile));
+    */
+    game_state = LEVEL_NEW;
     
-    // random init
-    for (int i = 0; i < active_grid.num_qs; i++)
-    {
-        for (int j = 0; j < active_grid.num_rs; j++)
-        {
-            int tph = GetRandomValue(10, 60); // tix_per_hour
-            test_tile = (Tile) {tph,
-                                GetRandomValue(0,11),    // time_hours
-                                GetRandomValue(0,tph-1), // time_tix
-                                true,                    //enabled
-                                OP_ADD,                       // op (starting with add)
-                                false
-                               };
-            memcpy(active_grid.cells[i][j], &test_tile, sizeof(Tile));
 
-        }
-    }
-
-    round_score = 400000;
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button
     {
-        UpdateDrawFrame();
+        if (game_state == LEVEL_NEW)
+        {
+            // random init
+            for (int i = 0; i < active_grid.num_qs; i++)
+            {
+                for (int j = 0; j < active_grid.num_rs; j++)
+                {
+                    int tph = GetRandomValue(10, 60); // tix_per_hour
+                    test_tile = (Tile) {tph,
+                                        GetRandomValue(0,11),    // time_hours
+                                        GetRandomValue(0,tph-1), // time_tix
+                                        true,                    //enabled
+                                        GetRandomValue(0,OP_DIV),     // op (starting with add)
+                                        false
+                                       };
+                    memcpy(active_grid.cells[i][j], &test_tile, sizeof(Tile));
+
+                }
+            }
+            game_state = LEVEL_ACTIVE;
+            round_score = active_grid.num_qs * active_grid.num_rs * 1000;
+        }
+        if (game_state == LEVEL_SUCCESS || game_state == GAME_OVER) 
+            UpdateDrawFrame_BetweenLevels();
+        else UpdateDrawFrame();
     }
 #endif
 
@@ -158,8 +179,6 @@ void UpdateDrawFrame(void)
     //----------------------------------------------------------------------------------
     // TODO: Update variables / Implement example logic at this point
     
-    const int GRIDPOS_X = 200;
-    const int GRIDPOS_Y = 200;
 
     if (start_score) round_score--;
 
@@ -178,6 +197,7 @@ void UpdateDrawFrame(void)
         if (ax_pos.q >= 0 && ax_pos.q < active_grid.num_qs && 
             ax_pos.r >= 0 && ax_pos.r < active_grid.num_rs)
         {
+            printf("This is a valid tile.\n");
             if (selected_tile == NULL)
             {
                 
@@ -238,6 +258,7 @@ void UpdateDrawFrame(void)
                         
                     }
                     printf("obj %i\n", object_tile->tix_per_hour);
+                    if (object_tile->tix_per_hour == 0) object_tile->tix_per_hour = 1;
 
                     // de-select tile
                     selected_tile->selected = false;
@@ -256,14 +277,28 @@ void UpdateDrawFrame(void)
         else
         {
             // clicking out of the game area de-selects
-            selected_tile->selected = false;
-            selected_tile = NULL;
-            selected_tile_pos = axial_to_cube(NULL_AX);
+            if (selected_tile != NULL)
+            {
+                selected_tile->selected = false;
+                selected_tile = NULL;
+                selected_tile_pos = axial_to_cube(NULL_AX);
+            }
         }
     }
 
     //advance_tile(&test_tile);
     update_grid(&active_grid);
+    if (count_active_tiles(&active_grid) == 1)
+    {
+        total_score += round_score;
+        game_state = LEVEL_SUCCESS;
+    }
+
+    if (round_score <= 0)
+    {
+        game_state = GAME_OVER;
+    }
+    
 
     //----------------------------------------------------------------------------------
 
@@ -274,8 +309,58 @@ void UpdateDrawFrame(void)
     BeginTextureMode(target);
         ClearBackground(DARKBROWN);
         
+        draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
+        DrawText(TextFormat("Round Score: %i", round_score), 0, 670, 20, YELLOW);
+        DrawText(TextFormat("Total Score: %i", total_score), 0, 700, 20, PALEYELLOW);
+        
+    EndTextureMode();
+    
+    // Render to screen (main framebuffer)
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
+        
+        // Draw render texture to screen, scaled if required
+        DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, -(float)target.texture.height }, 
+            (Rectangle){ 0, 0, (float)target.texture.width, (float)target.texture.height }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+
+        // TODO: Draw everything that requires to be drawn at this point, maybe UI?
+
+    EndDrawing();
+    //----------------------------------------------------------------------------------  
+}
+
+void UpdateDrawFrame_BetweenLevels(void)
+{
+
+    // Update
+    //-----------------------
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+        switch (game_state)
+        {
+            case LEVEL_SUCCESS:
+                game_state = LEVEL_NEW;
+                break;
+            case GAME_OVER:
+                break;
+        }
+    
+    // Draw
+    //----------------------------------------------------------------------------------
+    // Render game screen to a texture, 
+    // it could be useful for scaling or further shader postprocessing
+    BeginTextureMode(target);
+        ClearBackground(DARKBROWN);
         
         draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
+        DrawRectangle(0, 0, screenWidth, screenHeight, GRAYOUT);
+        DrawText(TextFormat("Round Score: %i", round_score), 
+                            screenWidth / 2, screenHeight / 2, 20, YELLOW);
+        DrawText(TextFormat("Total Score: %i", total_score), 
+                            screenWidth / 2, screenHeight / 2 + 30, 20, PALEYELLOW);
+
+        if (game_state == GAME_OVER) 
+            DrawText("Game over.", 20, 200, 100, YELLOW);
         
     EndTextureMode();
     

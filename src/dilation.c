@@ -150,6 +150,19 @@ float cube_distance(CubicCoord a, CubicCoord b)
     return max_dim;
 }
 
+int count_active_tiles(Grid* grid)
+{   
+    int output = 0;
+    for (int i = 0; i < grid->num_qs; i++)
+    {
+        for (int j = 0; j < grid->num_rs; j++)
+        {
+            output += grid->cells[i][j]->enabled;
+        }
+    }
+    return output;
+}
+
 /************************
  * tile stuff down here *
  ************************/
@@ -172,7 +185,7 @@ void advance_tile(Tile* tile)
     if (tile->time_tix >= tile->tix_per_hour)
     {
         tile->time_tix %= tile->tix_per_hour;
-        tile->time_hours += 1;
+        tile->time_hours += tile->tix_per_hour > 0? 1 : -1;
         if (tile->time_hours >= MAX_HOURS)
         {
             tile->time_hours %= MAX_HOURS;
@@ -180,6 +193,17 @@ void advance_tile(Tile* tile)
 
     }
 }
+
+// Yea, tehy're flipped. It's because if you add, time slows down.
+// THis is counter-intuitive. The user doesn't need ot know the details, just
+// needs ot see the icon.
+static const char *op_add_icon = "-";
+static const char *op_sub_icon = "+";
+static const char *op_mul_icon = "/";
+static const char *op_div_icon = "x";
+static const char *op_mod_icon = "%";
+
+
 
 void draw_tile(Tile* tile, Vector2 pos, float width)
 {
@@ -283,5 +307,26 @@ void draw_tile(Tile* tile, Vector2 pos, float width)
     dial_pos = Vector2Add(pos, dial_pos);
 
     DrawLine(pos.x, pos.y, dial_pos.x, dial_pos.y, BLACK);
+    
+    char* operator = "?";
+    switch (tile->operation)
+    {
+        case OP_ADD:
+            operator = op_add_icon;
+            break;
+        case OP_SUB:
+            operator = op_sub_icon;
+            break;
+        case OP_MUL:
+            operator = op_mul_icon;
+            break;
+        case OP_DIV:
+            operator = op_div_icon;
+            break;
+        case OP_MOD:
+            operator = op_mod_icon;
+            break;
+    }
+    DrawText(operator, pos.x, pos.y, 10, BLACK);
 
 }
