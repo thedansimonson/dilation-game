@@ -138,6 +138,11 @@ CubicCoord cube_subtract(CubicCoord a, CubicCoord b)
     return (CubicCoord) {a.q - b.q, a.r - b.r, a.s - b.s}; 
 }
 
+CubicCoord cube_add(CubicCoord a, CubicCoord b)
+{
+    return (CubicCoord) {a.q + b.q, a.r + b.r, a.s + b.s}; 
+}
+
 float cube_distance(CubicCoord a, CubicCoord b)
 {
     CubicCoord raw_delta = cube_subtract(a,b);
@@ -163,6 +168,55 @@ int count_active_tiles(Grid* grid)
     return output;
 }
 
+static const CubicCoord adjacency_deltas[NUM_ADJACENT_DELTAS] = 
+                                              {(CubicCoord) { 1,  0, -1},
+                                               (CubicCoord) { 1, -1,  0}, 
+                                               (CubicCoord) { 0, -1,  1}, 
+                                               (CubicCoord) { -1, 0,  1}, 
+                                               (CubicCoord) { -1, 1,  0}, 
+                                               (CubicCoord) {  0, 1, -1}};
+
+int check_fail_condition(Grid* grid)
+{
+    // check for unique failure conditions
+    
+    // first check for isolates
+    for (int i = 0; i < grid->num_qs; i++)
+    {
+        for (int j = 0; j < grid->num_rs; j++)
+        {
+            bool okay = false;
+            if (grid->cells[i][j]->enabled)
+            {
+                CubicCoord local = axial_to_cube((AxCoord) {i,j});
+                for (int d = 0; d < NUM_ADJACENT_DELTAS; d++)
+                {
+                    AxCoord neighbor = cube_to_axial(cube_add(local, 
+                                                              adjacency_deltas[d]));
+                    int q = (int) neighbor.q;
+                    int r = (int) neighbor.r;
+                    if (q >= 0 && q < grid->num_qs && r >= 0 && r < grid->num_rs 
+                        && grid->cells[q][r]->enabled)
+                    {
+                        okay = true;
+                        break;
+                    }
+                }
+            }
+            else okay = true; // cell not enabled
+            if (!okay) 
+            {
+                printf("< %i %i > was determined to be an isolate.\n", i, j);
+                return ISOLATE;
+            }
+        }
+    }
+
+
+    return 0;
+
+}
+
 /************************
  * tile stuff down here *
  ************************/
@@ -186,12 +240,47 @@ void advance_tile(Tile* tile)
     {
         tile->time_tix %= tile->tix_per_hour;
         tile->time_hours += tile->tix_per_hour > 0? 1 : -1;
-        if (tile->time_hours >= MAX_HOURS)
-        {
-            tile->time_hours %= MAX_HOURS;
-        }
-
+        tile->time_hours %= MAX_HOURS;
     }
+}
+
+bool tiles_mergeable(Tile* a, Tile* b)
+{   
+    int a_hours = a->time_hours > 0? a->time_hours : a->time_hours + 12;
+    int b_hours = b->time_hours > 0? b->time_hours : b->time_hours + 12;
+    return a->time_hours == b->time_hours;
+}
+
+void merge_tiles(Tile* a, Tile* b)
+{
+
+    printf("obj %i OP(%i) selected %i = ",
+           a->tix_per_hour,
+           b->operation,
+           b->tix_per_hour);
+    b->enabled = false;
+    switch (b->operation)
+    {
+        default:
+        case OP_ADD:
+            a->tix_per_hour += b->tix_per_hour;
+            break;
+        case OP_SUB:
+            a->tix_per_hour -= b->tix_per_hour;
+            break;
+        case OP_MUL:
+            a->tix_per_hour *= b->tix_per_hour;
+            break;
+        case OP_DIV:
+            a->tix_per_hour /= b->tix_per_hour;
+            break;
+        case OP_MOD:
+            a->tix_per_hour %= b->tix_per_hour;
+            break;
+        
+    }
+    printf("obj %i\n", a->tix_per_hour);
+    if (a->tix_per_hour <= 1) a->tix_per_hour = 2;
 }
 
 // Yea, tehy're flipped. It's because if you add, time slows down.

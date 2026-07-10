@@ -16,6 +16,11 @@
 // this should always be out of the grid space
 #define NULL_AX (AxCoord) {-2, -2}
 
+#define ISOLATE 1
+#define ALL_SYNC 2
+
+#define NUM_ADJACENT_DELTAS 6
+
 typedef struct Tile {
     int tix_per_hour; 
     int time_hours;
@@ -75,7 +80,10 @@ CubicCoord cube_round(CubicCoord);
 AxCoord axial_round(AxCoord);
 float cube_distance(CubicCoord, CubicCoord);
 int count_active_tiles(Grid *);
+int check_fail_condition(Grid *);
 
 void init_tile(Tile *);
 void advance_tile(Tile *);
+bool tiles_mergeable(Tile *, Tile *);
+void merge_tiles(Tile *, Tile *);
 void draw_tile(Tile*, Vector2, float);

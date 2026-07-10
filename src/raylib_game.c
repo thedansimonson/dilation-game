@@ -66,12 +66,26 @@ static CubicCoord selected_tile_pos = { 0 };
 static bool start_score = false;
 static int round_score = 0;
 static int total_score = 0;
+static int level_counter = 0;
+static bool isolated_cells = false;
+static bool too_long = false;
+
+static int tutorial_state = 0;
+#define TUTORIAL_LENGTH 5
+static char *tutorial_entries[TUTORIAL_LENGTH] = 
+    {"Click a hexagon to start.",
+     "With a selected hex, you can click to merge it with an adjacent one.",
+     "You can only merge when the dials have the same value.",
+     "The speed of the dial after merging depends on the [+ - x or /] \nspecified in each dial.",
+     "Taking too long, or making it impossible to merge all clocks, \nwill end the game."
+    };
 
 #define NEW_GAME 0
 #define LEVEL_ACTIVE 1
 #define LEVEL_SUCCESS 2
 #define LEVEL_NEW 3
 #define GAME_OVER 4
+#define TUTORIAL 5
 
 static int game_state = NEW_GAME;
 
@@ -82,6 +96,7 @@ static int game_state = NEW_GAME;
 //----------------------------------------------------------------------------------
 static void UpdateDrawFrame(void);      // Update and Draw one frame
 static void UpdateDrawFrame_BetweenLevels(void);      // Update and Draw one frame
+static void UpdateDrawFrame_ActiveLevel(void);      // Update and Draw one frame
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -95,6 +110,7 @@ int main(void)
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "Dilation");
+    InitAudioDevice();
     
     // TODO: Load resources / Initialize variables at this point
     
@@ -102,6 +118,12 @@ int main(void)
     // NOTE: If screen is scaled, mouse input should be scaled proportionally
     target = LoadRenderTexture(screenWidth, screenHeight);
     SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR);
+    
+    active_grid.num_qs = 2;
+    active_grid.num_rs = 2;
+    init_grid(&active_grid);
+    game_state = LEVEL_NEW;
+    
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -109,50 +131,10 @@ int main(void)
     SetTargetFPS(60);     // Set our game frames-per-second
     //--------------------------------------------------------------------------------------
     
-    active_grid.num_qs = 2;
-    active_grid.num_rs = 2;
-    init_grid(&active_grid);
-    memcpy(active_grid.cells[0][0], &test_tile, sizeof(Tile)); 
-    
-    /*
-    test_tile = (Tile) {120, 4, 10, true, OP_ADD, false};
-    memcpy(active_grid.cells[1][0], &test_tile, sizeof(Tile));
-
-    test_tile = (Tile) {1, 6, 10, true, OP_ADD, false};
-    memcpy(active_grid.cells[3][3], &test_tile, sizeof(Tile));
-    */
-    game_state = LEVEL_NEW;
-    
-
-
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button
     {
-        if (game_state == LEVEL_NEW)
-        {
-            // random init
-            for (int i = 0; i < active_grid.num_qs; i++)
-            {
-                for (int j = 0; j < active_grid.num_rs; j++)
-                {
-                    int tph = GetRandomValue(10, 60); // tix_per_hour
-                    test_tile = (Tile) {tph,
-                                        GetRandomValue(0,11),    // time_hours
-                                        GetRandomValue(0,tph-1), // time_tix
-                                        true,                    //enabled
-                                        GetRandomValue(0,OP_DIV),     // op (starting with add)
-                                        false
-                                       };
-                    memcpy(active_grid.cells[i][j], &test_tile, sizeof(Tile));
-
-                }
-            }
-            game_state = LEVEL_ACTIVE;
-            round_score = active_grid.num_qs * active_grid.num_rs * 1000;
-        }
-        if (game_state == LEVEL_SUCCESS || game_state == GAME_OVER) 
-            UpdateDrawFrame_BetweenLevels();
-        else UpdateDrawFrame();
+        UpdateDrawFrame();
     }
 #endif
 
@@ -161,7 +143,8 @@ int main(void)
     UnloadRenderTexture(target);
     
     // TODO: Unload all loaded resources at this point
-
+    
+    CloseAudioDevice();
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -173,7 +156,53 @@ int main(void)
 // Module Functions Definition
 //--------------------------------------------------------------------------------------------
 // Update and draw frame
+
 void UpdateDrawFrame(void)
+{
+    if (game_state == NEW_GAME)
+    {
+        round_score = 0;
+        total_score = 0;
+        level_counter = 0;
+        game_state = LEVEL_NEW;
+    }
+    if (game_state == LEVEL_NEW)
+    {
+        int new_level_size = level_counter + 2;
+        
+        active_grid = (Grid) { 0 };
+
+        active_grid.num_qs = new_level_size;
+        active_grid.num_rs = new_level_size;
+        init_grid(&active_grid);
+
+        // random init
+        for (int i = 0; i < active_grid.num_qs; i++)
+        {
+            for (int j = 0; j < active_grid.num_rs; j++)
+            {
+                int tph = GetRandomValue(10, 60); // tix_per_hour
+                test_tile = (Tile) {tph,
+                                    GetRandomValue(0,11),    // time_hours
+                                    GetRandomValue(0,tph-1), // time_tix
+                                    true,                    //enabled
+                                    GetRandomValue(0,OP_DIV),     // op (starting with add)
+                                    false
+                                   };
+                memcpy(active_grid.cells[i][j], &test_tile, sizeof(Tile));
+
+            }
+        }
+        game_state = LEVEL_ACTIVE;
+        round_score = active_grid.num_qs * active_grid.num_rs * 1000;
+        start_score = false;
+        level_counter++;
+    }
+    if (game_state == LEVEL_SUCCESS || game_state == GAME_OVER) 
+        UpdateDrawFrame_BetweenLevels();
+    else UpdateDrawFrame_ActiveLevel();
+}
+void UpdateDrawFrame_ActiveLevel(void)
 {
     // Update
     //----------------------------------------------------------------------------------
@@ -186,6 +215,9 @@ void UpdateDrawFrame(void)
     {
         // on first click, start scoring.
         start_score = true; 
+
+        tutorial_state += 1;
+        tutorial_state %= TUTORIAL_LENGTH;
 
         Vector2 mouse_pos = GetMousePosition();
         printf("mouse_pos: < %f %f > ", mouse_pos.x, mouse_pos.y);
@@ -227,38 +259,12 @@ void UpdateDrawFrame(void)
                 // is the tile enabled?
 
                 // are the tile hours in sync?
-                bool syncable = selected_tile->time_hours == object_tile->time_hours;
+                bool syncable = tiles_mergeable(selected_tile, object_tile);
 
                 // if all of the conditions are true, merge
                 if (adjacent && object_tile->enabled && syncable)
                 {
-                    printf("obj %i OP(%i) selected %i = ",
-                           object_tile->tix_per_hour,
-                           selected_tile->operation,
-                           selected_tile->tix_per_hour);
-                    selected_tile->enabled = false;
-                    switch (selected_tile->operation)
-                    {
-                        default:
-                        case OP_ADD:
-                            object_tile->tix_per_hour += selected_tile->tix_per_hour;
-                            break;
-                        case OP_SUB:
-                            object_tile->tix_per_hour -= selected_tile->tix_per_hour;
-                            break;
-                        case OP_MUL:
-                            object_tile->tix_per_hour *= selected_tile->tix_per_hour;
-                            break;
-                        case OP_DIV:
-                            object_tile->tix_per_hour /= selected_tile->tix_per_hour;
-                            break;
-                        case OP_MOD:
-                            object_tile->tix_per_hour %= selected_tile->tix_per_hour;
-                            break;
-                        
-                    }
-                    printf("obj %i\n", object_tile->tix_per_hour);
-                    if (object_tile->tix_per_hour == 0) object_tile->tix_per_hour = 1;
+                    merge_tiles(object_tile, selected_tile);
 
                     // de-select tile
                     selected_tile->selected = false;
@@ -293,9 +299,12 @@ void UpdateDrawFrame(void)
         total_score += round_score;
         game_state = LEVEL_SUCCESS;
     }
-
-    if (round_score <= 0)
+    
+    isolated_cells = check_fail_condition(&active_grid) == ISOLATE;
+    too_long = round_score <= 0;
+    if ((too_long || isolated_cells) && game_state != LEVEL_SUCCESS)
     {
+        round_score = 0;
         game_state = GAME_OVER;
     }
     
@@ -310,7 +319,12 @@ void UpdateDrawFrame(void)
         ClearBackground(DARKBROWN);
         
         draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
-        DrawText(TextFormat("Round Score: %i", round_score), 0, 670, 20, YELLOW);
+        
+        if (level_counter == 1) DrawText(tutorial_entries[tutorial_state], 
+                                         20, 20, 20, YELLOW);
+
+        DrawText(TextFormat("Round %i Score: %i", level_counter, round_score), 
+                 0, 670, 20, YELLOW);
         DrawText(TextFormat("Total Score: %i", total_score), 0, 700, 20, PALEYELLOW);
         
     EndTextureMode();
@@ -335,13 +349,14 @@ void UpdateDrawFrame_BetweenLevels(void)
     // Update
     //-----------------------
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+    if (IsKeyPressed(KEY_SPACE)) 
         switch (game_state)
         {
             case LEVEL_SUCCESS:
                 game_state = LEVEL_NEW;
                 break;
             case GAME_OVER:
+                game_state = NEW_GAME;
                 break;
         }
     
@@ -354,13 +369,24 @@ void UpdateDrawFrame_BetweenLevels(void)
         
         draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
         DrawRectangle(0, 0, screenWidth, screenHeight, GRAYOUT);
-        DrawText(TextFormat("Round Score: %i", round_score), 
+        DrawText(TextFormat("Round %i Score: %i", level_counter, round_score), 
                             screenWidth / 2, screenHeight / 2, 20, YELLOW);
         DrawText(TextFormat("Total Score: %i", total_score), 
                             screenWidth / 2, screenHeight / 2 + 30, 20, PALEYELLOW);
 
-        if (game_state == GAME_OVER) 
+        if (game_state == GAME_OVER)
+        {
             DrawText("Game over.", 20, 200, 100, YELLOW);
+            if (too_long) DrawText("You were too slow...", 20, 300, 20, PALEYELLOW);
+            if (isolated_cells) 
+                DrawText("You created an unsolvable situation...", 20, 300, 20, PALEYELLOW);
+            DrawText("Press [Space] to begin again!", 20, screenHeight/2 + 60, 20, YELLOW);
+        }
+        else
+        {
+            DrawText("Press [Space] to continue...", 
+                            screenWidth / 2, screenHeight / 2 - 60, 20, YELLOW);
+        }
         
     EndTextureMode();
     
