@@ -9,13 +9,13 @@ BEGIN
     //BLOCK "080904E4"     // English UK
     BLOCK "040904E4"    // English US
     BEGIN
-      VALUE "CompanyName", "raylib technologies"
-      VALUE "FileDescription", "raylib-game | A great game"
+      VALUE "CompanyName", "Domus Entertainment Syndicate"
+      VALUE "FileDescription", "Dilation: where time is of the essence."
       VALUE "FileVersion", "1.0"
-      VALUE "InternalName", "raylib-game"
-      VALUE "LegalCopyright", "(c) 2025 raylib technologies (@raylibtech)"
+      VALUE "InternalName", "dilation"
+      VALUE "LegalCopyright", "(c) 2026 Dan Simonson (@thedansimonson)"
       //VALUE "OriginalFilename", "raylib_app.exe"
-      VALUE "ProductName", "raylib-game"
+      VALUE "ProductName", "dilation"
       VALUE "ProductVersion", "1.0"
     END
   END
