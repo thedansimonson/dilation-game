@@ -74,13 +74,25 @@ static int tutorial_state = 0;
 #define TUTORIAL_LENGTH 5
 static char *tutorial_entries[TUTORIAL_LENGTH] = 
     {"Click a hexagon to start.",
-     "With a selected hex, you can click to merge it with an adjacent one.",
-     "You can only merge when the dials have the same value.",
+     "With a selected hex, you can click to merge it with an adjacent one, \n but only if the clock faces show the same time.",
      "The speed of the dial after merging depends on the [+ - x or /] \nspecified in each dial.",
-     "Taking too long, or making it impossible to merge all clocks, \nwill end the game."
+     "Taking too long, or making it impossible to merge all clocks, \nwill end the game.",
+     "Merging all the clocks into a single one will advance to the next level."
     };
 
 static int splash_screen_counter = 3000;
+
+static Sound sound_diddy_cool;
+static bool splash_music_played = false;
+
+static Sound sound_diddy_of_defeat;
+static bool defeat_music_played = false;
+
+static Sound sound_select_minus;
+static Sound sound_select;
+static Sound sound_select_plus;
+
+static Sound sound_thump;
 
 #define NEW_GAME 0
 #define LEVEL_ACTIVE 1
@@ -114,6 +126,20 @@ int main(void)
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "Dilation");
     InitAudioDevice();
+
+    sound_diddy_cool = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/diddy-cool.mp3");
+    sound_diddy_of_defeat = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/diddy-of-defeat.mp3");
+
+    sound_select = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/select-minus-half-step.mp3");
+    
+    sound_select_plus = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/select-plus-half-step.mp3");
+
+    sound_select_minus = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/select-minus-15-step.mp3");
+
+    sound_thump = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/thump.mp3");
+
+
+    
     
     // TODO: Load resources / Initialize variables at this point
     
@@ -186,7 +212,7 @@ void UpdateDrawFrame(void)
         {
             for (int j = 0; j < active_grid.num_rs; j++)
             {
-                int tph = GetRandomValue(10, 60); // tix_per_hour
+                int tph = GetRandomValue(10, 100); // tix_per_hour
                 test_tile = (Tile) {tph,
                                     GetRandomValue(0,11),    // time_hours
                                     GetRandomValue(0,tph-1), // time_tix
@@ -245,6 +271,8 @@ void UpdateDrawFrame_ActiveLevel(void)
                 selected_tile->selected = true;
                 selected_tile_pos = axial_to_cube(ax_pos);
 
+                PlaySound(sound_select);
+
                 if (!selected_tile->enabled)
                 {
                     selected_tile->selected = false;
@@ -271,12 +299,18 @@ void UpdateDrawFrame_ActiveLevel(void)
                 // if all of the conditions are true, merge
                 if (adjacent && object_tile->enabled && syncable)
                 {
+                    int old_tph = object_tile->tix_per_hour;
                     merge_tiles(object_tile, selected_tile);
 
                     // de-select tile
                     selected_tile->selected = false;
                     selected_tile = NULL;
                     selected_tile_pos = axial_to_cube(NULL_AX);
+                    
+                    if (old_tph > object_tile->tix_per_hour)
+                        PlaySound(sound_select_plus);
+                    else
+                        PlaySound(sound_select_minus);
                 }
                 else if (same_as_selected) 
                 {
@@ -284,6 +318,10 @@ void UpdateDrawFrame_ActiveLevel(void)
                     selected_tile->selected = false;
                     selected_tile = NULL;
                     selected_tile_pos = axial_to_cube(NULL_AX);
+                }
+                else
+                {
+                    PlaySound(sound_thump);
                 }
             }
         }
@@ -307,7 +345,7 @@ void UpdateDrawFrame_ActiveLevel(void)
         game_state = LEVEL_SUCCESS;
     }
     
-    isolated_cells = check_fail_condition(&active_grid) == ISOLATE;
+    isolated_cells = check_fail_condition(&active_grid) != 0;
     too_long = round_score <= 0;
     if ((too_long || isolated_cells) && game_state != LEVEL_SUCCESS)
     {
@@ -323,7 +361,7 @@ void UpdateDrawFrame_ActiveLevel(void)
     // Render game screen to a texture, 
     // it could be useful for scaling or further shader postprocessing
     BeginTextureMode(target);
-        ClearBackground(DARKBROWN);
+        ClearBackground(DARKPURPLE);
         
         draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
         
@@ -356,14 +394,23 @@ void UpdateDrawFrame_SplashScreen(void)
     // Update
     //-----------------------
 
+    if (!splash_music_played)
+    {
+        PlaySound(sound_diddy_cool);
+        splash_music_played = true;
+    }
+
     if (IsKeyPressed(KEY_SPACE)) 
+    {
+        splash_music_played = false;
         game_state = NEW_GAME;
+    }
 
     splash_screen_counter-=4;
     if (splash_screen_counter <= 0) splash_screen_counter = 2000;
 
     BeginTextureMode(target);
-        ClearBackground(DARKBROWN);
+        ClearBackground(DARKPURPLE);
         
         draw_grid(&active_grid, 
                   -splash_screen_counter/2 + screenWidth/2, 
@@ -397,7 +444,16 @@ void UpdateDrawFrame_BetweenLevels(void)
     // Update
     //-----------------------
 
+    if (!splash_music_played && game_state != GAME_OVER)
+    {
+        PlaySound(sound_diddy_cool);
+        splash_music_played = true;
+    }
+
+
     if (IsKeyPressed(KEY_SPACE)) 
+    {
+        splash_music_played = false;
         switch (game_state)
         {
             case LEVEL_SUCCESS:
@@ -407,13 +463,14 @@ void UpdateDrawFrame_BetweenLevels(void)
                 game_state = NEW_GAME;
                 break;
         }
+    }
     
     // Draw
     //----------------------------------------------------------------------------------
     // Render game screen to a texture, 
     // it could be useful for scaling or further shader postprocessing
     BeginTextureMode(target);
-        ClearBackground(DARKBROWN);
+        ClearBackground(DARKPURPLE);
         
         draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
         DrawRectangle(0, 0, screenWidth, screenHeight, GRAYOUT);
@@ -429,6 +486,12 @@ void UpdateDrawFrame_BetweenLevels(void)
             if (isolated_cells) 
                 DrawText("You created an unsolvable situation...", 20, 300, 20, PALEYELLOW);
             DrawText("Press [Space] to begin again!", 20, screenHeight/2 + 60, 20, YELLOW);
+
+            if (!defeat_music_played)
+            {
+                PlaySound(sound_diddy_of_defeat);
+                defeat_music_played = true;
+            }
         }
         else
         {

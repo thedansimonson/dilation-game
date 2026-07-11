@@ -12,6 +12,7 @@
 
 #define PALEYELLOW     CLITERAL(Color){ 253, 249, 128, 255 }
 #define GRAYOUT        CLITERAL(Color){ 64, 64, 64, 128 }
+#define DARKPURPLE     CLITERAL(Color){ 32, 16, 32, 255 } 
 
 // this should always be out of the grid space
 #define NULL_AX (AxCoord) {-2, -2}

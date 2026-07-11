@@ -211,8 +211,36 @@ int check_fail_condition(Grid* grid)
             }
         }
     }
+    
+    // now check if all the clocks are in sync. 
+    bool checked_anything = false;
+    int tph_cache = 0;
+    bool sync_okay = false;
+    for (int i = 0; i < grid->num_qs; i++)
+    {
+        for (int j = 0; j < grid->num_rs; j++)
+        {
+            if (grid->cells[i][j]->enabled)
+            {
+                if (!checked_anything)
+                {
+                    checked_anything = true;
+                    tph_cache = grid->cells[i][j]->tix_per_hour;
+                }
+                else
+                {
+                    if(tph_cache != grid->cells[i][j]->tix_per_hour)
+                    {
+                        sync_okay = true;
+                        break;
+                    }
+                }
 
-
+            }
+        }
+        if (sync_okay == true) break;
+    }
+    if (!sync_okay) return ALL_SYNC;
     return 0;
 
 }
@@ -251,46 +279,61 @@ bool tiles_mergeable(Tile* a, Tile* b)
     return a->time_hours == b->time_hours;
 }
 
-void merge_tiles(Tile* a, Tile* b)
-{
-
-    printf("obj %i OP(%i) selected %i = ",
-           a->tix_per_hour,
-           b->operation,
-           b->tix_per_hour);
-    b->enabled = false;
-    switch (b->operation)
-    {
-        default:
-        case OP_ADD:
-            a->tix_per_hour += b->tix_per_hour;
-            break;
-        case OP_SUB:
-            a->tix_per_hour -= b->tix_per_hour;
-            break;
-        case OP_MUL:
-            a->tix_per_hour *= b->tix_per_hour;
-            break;
-        case OP_DIV:
-            a->tix_per_hour /= b->tix_per_hour;
-            break;
-        case OP_MOD:
-            a->tix_per_hour %= b->tix_per_hour;
-            break;
-        
-    }
-    printf("obj %i\n", a->tix_per_hour);
-    if (a->tix_per_hour <= 1) a->tix_per_hour = 2;
-}
 
 // Yea, tehy're flipped. It's because if you add, time slows down.
 // THis is counter-intuitive. The user doesn't need ot know the details, just
 // needs ot see the icon.
-static const char *op_add_icon = "-";
-static const char *op_sub_icon = "+";
+static const char *op_add_icon = "+";
+static const char *op_sub_icon = "-";
 static const char *op_mul_icon = "/";
 static const char *op_div_icon = "x";
 static const char *op_mod_icon = "%";
+
+void merge_tiles(Tile* a, Tile* b)
+{
+
+    b->enabled = false;
+    
+    // originally, this was with tix per hour, but it proved unintuitive
+    float a_period = 1.0 / a->tix_per_hour;
+    float b_period = 1.0 / b->tix_per_hour;
+    float result_period = 2;
+
+    char *op_icon = NULL;
+    switch (b->operation)
+    {
+        default:
+        case OP_ADD:
+            result_period = a_period + b_period;
+            op_icon = op_add_icon;
+            break;
+        case OP_SUB:
+            result_period = a_period - b_period;
+            op_icon = op_sub_icon;
+            break;
+        case OP_MUL:
+            result_period = a_period * b_period;
+            op_icon = op_mul_icon;
+            break;
+        case OP_DIV:
+            result_period = a_period / b_period;
+            op_icon = op_div_icon;
+            break;
+        
+    }
+    printf("obj %i %s selected %i = ",
+           a->tix_per_hour,
+           op_icon,
+           b->tix_per_hour);
+    // we convert back to tix per hour
+    if (result_period < 0.001) result_period = 0.001;
+    a->tix_per_hour = (int) 1/result_period;
+    printf("obj %i\n", a->tix_per_hour);
+    printf("in actual math: %f OP %f = %f\n", 
+           a_period, b_period, result_period); 
+
+    if (a->tix_per_hour <= 2) a->tix_per_hour = 3;
+}
 
 
 
