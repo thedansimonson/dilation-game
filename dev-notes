@@ -2,19 +2,35 @@ https://www.redblobgames.com/grids/hexagons/
 
 
 Todo:
-* selection
-* second selection
-* merging
-* operators and displaying operators
+X selection
+X second selection
+X merging
+X operators and displaying operators
 
-* levels
+X levels
 
-* start menu
 
-* music??
-* sfx???
+X start menu / splash
+X tweak ops so they're more predictable. 
+    * still shit but better
+X music??
+X sfx???
+X sync death
+
+
+
+* compile for web and deploy
+
+* center grid better
+
+* win screen
+
+* better BG
 
 * smooth pixels?
     * https://www.raylib.com/examples/core/loader.html?name=core_smooth_pixelperfect
+
+
+Not this time. 
 * animation
     * slides
