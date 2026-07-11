@@ -112,6 +112,7 @@ static int game_state = NEW_GAME;
 static void UpdateDrawFrame(void);      // Update and Draw one frame
 static void UpdateDrawFrame_BetweenLevels(void);      // Update and Draw one frame
 static void UpdateDrawFrame_ActiveLevel(void);      // Update and Draw one frame
+static void UpdateDrawFrame_SplashScreen(void);
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -127,16 +128,16 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "Dilation");
     InitAudioDevice();
 
-    sound_diddy_cool = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/diddy-cool.mp3");
-    sound_diddy_of_defeat = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/diddy-of-defeat.mp3");
+    sound_diddy_cool = LoadSound("resources/diddy-cool.mp3");
+    sound_diddy_of_defeat = LoadSound("resources/diddy-of-defeat.mp3");
 
-    sound_select = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/select-minus-half-step.mp3");
+    sound_select = LoadSound("resources/select-minus-half-step.mp3");
     
-    sound_select_plus = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/select-plus-half-step.mp3");
+    sound_select_plus = LoadSound("resources/select-plus-half-step.mp3");
 
-    sound_select_minus = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/select-minus-15-step.mp3");
+    sound_select_minus = LoadSound("resources/select-minus-15-step.mp3");
 
-    sound_thump = LoadSound("/home/emperor/Desktop/raylib-gamejam-2026/dilation-game/resources/thump.mp3");
+    sound_thump = LoadSound("resources/thump.mp3");
 
 
     
@@ -200,7 +201,7 @@ void UpdateDrawFrame(void)
     {
         int new_level_size = level_counter + 2;
 
-        free_grid(&active_grid);
+        //free_grid(&active_grid);
         active_grid = (Grid) { 0 };
 
         active_grid.num_qs = new_level_size;
@@ -361,7 +362,7 @@ void UpdateDrawFrame_ActiveLevel(void)
     // Render game screen to a texture, 
     // it could be useful for scaling or further shader postprocessing
     BeginTextureMode(target);
-        ClearBackground(DARKPURPLE);
+        ClearBackground(DANKPURPLE);
         
         draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
         
@@ -410,7 +411,7 @@ void UpdateDrawFrame_SplashScreen(void)
     if (splash_screen_counter <= 0) splash_screen_counter = 2000;
 
     BeginTextureMode(target);
-        ClearBackground(DARKPURPLE);
+        ClearBackground(DANKPURPLE);
         
         draw_grid(&active_grid, 
                   -splash_screen_counter/2 + screenWidth/2, 
@@ -470,7 +471,7 @@ void UpdateDrawFrame_BetweenLevels(void)
     // Render game screen to a texture, 
     // it could be useful for scaling or further shader postprocessing
     BeginTextureMode(target);
-        ClearBackground(DARKPURPLE);
+        ClearBackground(DANKPURPLE);
         
         draw_grid(&active_grid, GRIDPOS_X, GRIDPOS_Y, GRIDSIZE);
         DrawRectangle(0, 0, screenWidth, screenHeight, GRAYOUT);

@@ -18,7 +18,7 @@ void init_grid(Grid* grid)
         grid->cells[i] = malloc(sizeof(Tile **) * grid->num_rs);
         for (int j = 0; j < grid->num_rs; j++)
         {
-            grid->cells[i][j] = malloc(sizeof(Tile *));
+            grid->cells[i][j] = RL_MALLOC(sizeof(Tile*));
             init_tile(grid->cells[i][j]);
         }
     }
@@ -117,9 +117,9 @@ CubicCoord cube_round(CubicCoord ax)
     float r = round(ax.r);
     float s = round(ax.s);
 
-    int q_diff = abs(q - ax.q);
-    int r_diff = abs(r - ax.r);
-    int s_diff = abs(s - ax.s);
+    int q_diff = fabsf(q - ax.q);
+    int r_diff = fabsf(r - ax.r);
+    int s_diff = fabsf(s - ax.s);
 
     if (q_diff > r_diff && q_diff > s_diff) q = -r-s;
     else if (r_diff > s_diff) r = -q-s;
@@ -146,9 +146,9 @@ CubicCoord cube_add(CubicCoord a, CubicCoord b)
 float cube_distance(CubicCoord a, CubicCoord b)
 {
     CubicCoord raw_delta = cube_subtract(a,b);
-    CubicCoord delta = (CubicCoord) { abs(raw_delta.q), 
-                                      abs(raw_delta.r),
-                                      abs(raw_delta.s) };
+    CubicCoord delta = (CubicCoord) { fabsf(raw_delta.q), 
+                                      fabsf(raw_delta.r),
+                                      fabsf(raw_delta.s) };
     float max_dim = delta.q >= delta.r && delta.q >= delta.s? delta.q :
                     delta.r >= delta.q && delta.r >= delta.s? delta.r :
                                                               delta.s;
@@ -276,7 +276,7 @@ bool tiles_mergeable(Tile* a, Tile* b)
 {   
     int a_hours = a->time_hours > 0? a->time_hours : a->time_hours + 12;
     int b_hours = b->time_hours > 0? b->time_hours : b->time_hours + 12;
-    return a->time_hours == b->time_hours;
+    return a_hours == b_hours;
 }
 
 
@@ -437,8 +437,9 @@ void draw_tile(Tile* tile, Vector2 pos, float width)
     Vector2 dial_pos = (Vector2) { dial_length * cos(dial_theta), 
                                    dial_length * sin(dial_theta) };
     dial_pos = Vector2Add(pos, dial_pos);
-
-    DrawLine(pos.x, pos.y, dial_pos.x, dial_pos.y, BLACK);
+    
+    //DrawLine(pos.x, pos.y, dial_pos.x, dial_pos.y, 3.0, BLACK);
+    DrawLineEx(pos, dial_pos, 3.0, BLACK);
     
     char* operator = "?";
     switch (tile->operation)
