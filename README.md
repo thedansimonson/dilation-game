@@ -60,9 +60,10 @@ Merging clocks changes their tick rate.
 
 ### Features
 
- - $(Game Feature 01)
- - $(Game Feature 02)
- - $(Game Feature 03)
+ - Puzzlement
+ - Strategy
+ - Hex Merging
+ - Bass Riffs
 
 ### Controls
 
@@ -77,9 +78,7 @@ _TODO: Show your game to the world, animated GIFs recommended!._
 
 ### Developers
 
- - $(Developer 01) - $(Role/Tasks Developed)
- - $(Developer 02) - $(Role/Tasks Developed)
- - $(Developer 03) - $(Role/Tasks Developed)
+ - Dan Simonson: code, art, bass riffs
 
 ### Links
 
