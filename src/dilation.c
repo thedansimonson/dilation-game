@@ -18,7 +18,8 @@ void init_grid(Grid* grid)
         grid->cells[i] = malloc(sizeof(Tile **) * grid->num_rs);
         for (int j = 0; j < grid->num_rs; j++)
         {
-            grid->cells[i][j] = RL_MALLOC(sizeof(Tile*));
+            // This is weird but it's got to do with a bug compiling for WASM
+            grid->cells[i][j] = malloc(24); //RL_MALLOC(sizeof(Tile*));
             init_tile(grid->cells[i][j]);
         }
     }
