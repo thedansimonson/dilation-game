@@ -49,6 +49,8 @@ _Copyright (c) 2014-2026 Ramon Santamaria ([@raysan5](https://github.com/raysan5
 
 ## Dilation 
 
+### The game where *time is of the essence*.
+
 ![Dilation](screenshots/dilation-splash_2026-07-11.png "Dilation")
 ![Dilation](screenshots/dilation-game_2026-07-11.png "Dilation")
 
