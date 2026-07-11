@@ -72,6 +72,7 @@ Merging clocks changes their tick rate.
 
 Mouse:
 - select and merge
+
 Spacebar:
 - start next level
 
@@ -88,7 +89,5 @@ Spacebar:
 ### License
 
 This project sources are licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
-
-$(Additional Licenses)
 
 *Copyright (c) 2026 Dan Simonson (thedansimonson)*
