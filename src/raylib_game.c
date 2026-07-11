@@ -80,12 +80,15 @@ static char *tutorial_entries[TUTORIAL_LENGTH] =
      "Taking too long, or making it impossible to merge all clocks, \nwill end the game."
     };
 
+static int splash_screen_counter = 3000;
+
 #define NEW_GAME 0
 #define LEVEL_ACTIVE 1
 #define LEVEL_SUCCESS 2
 #define LEVEL_NEW 3
 #define GAME_OVER 4
 #define TUTORIAL 5
+#define SPLASH_SCREEN 6
 
 static int game_state = NEW_GAME;
 
@@ -119,10 +122,11 @@ int main(void)
     target = LoadRenderTexture(screenWidth, screenHeight);
     SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR);
     
-    active_grid.num_qs = 2;
-    active_grid.num_rs = 2;
+    active_grid.num_qs = 8;
+    active_grid.num_rs = 8;
     init_grid(&active_grid);
-    game_state = LEVEL_NEW;
+    game_state = SPLASH_SCREEN;
+    //game_state = LEVEL_NEW;
     
 
 #if defined(PLATFORM_WEB)
@@ -169,7 +173,8 @@ void UpdateDrawFrame(void)
     if (game_state == LEVEL_NEW)
     {
         int new_level_size = level_counter + 2;
-        
+
+        free_grid(&active_grid);
         active_grid = (Grid) { 0 };
 
         active_grid.num_qs = new_level_size;
@@ -200,6 +205,8 @@ void UpdateDrawFrame(void)
     }
     if (game_state == LEVEL_SUCCESS || game_state == GAME_OVER) 
         UpdateDrawFrame_BetweenLevels();
+    else if (game_state == SPLASH_SCREEN)
+        UpdateDrawFrame_SplashScreen();
     else UpdateDrawFrame_ActiveLevel();
 }
 void UpdateDrawFrame_ActiveLevel(void)
@@ -341,6 +348,47 @@ void UpdateDrawFrame_ActiveLevel(void)
 
     EndDrawing();
     //----------------------------------------------------------------------------------  
+}
+
+void UpdateDrawFrame_SplashScreen(void)
+{
+    
+    // Update
+    //-----------------------
+
+    if (IsKeyPressed(KEY_SPACE)) 
+        game_state = NEW_GAME;
+
+    splash_screen_counter-=4;
+    if (splash_screen_counter <= 0) splash_screen_counter = 2000;
+
+    BeginTextureMode(target);
+        ClearBackground(DARKBROWN);
+        
+        draw_grid(&active_grid, 
+                  -splash_screen_counter/2 + screenWidth/2, 
+                  -splash_screen_counter/2 + screenHeight/2, splash_screen_counter);
+        DrawRectangle(0, 0, screenWidth, screenHeight, GRAYOUT);
+
+        DrawText("Dilation", 20, 200, 100, YELLOW);
+
+        DrawText("Press [Space] to begin...", 
+                        screenWidth / 2, screenHeight / 2 - 60, 20, YELLOW);
+        
+    EndTextureMode();
+    
+    // Render to screen (main framebuffer)
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
+        
+        // Draw render texture to screen, scaled if required
+        DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, -(float)target.texture.height }, 
+            (Rectangle){ 0, 0, (float)target.texture.width, (float)target.texture.height }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+
+        // TODO: Draw everything that requires to be drawn at this point, maybe UI?
+
+    EndDrawing();
+
 }
 
 void UpdateDrawFrame_BetweenLevels(void)
