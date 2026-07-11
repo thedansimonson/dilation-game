@@ -128,16 +128,16 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "Dilation");
     InitAudioDevice();
 
-    sound_diddy_cool = LoadSound("src/resources/diddy-cool.mp3");
-    sound_diddy_of_defeat = LoadSound("src/resources/diddy-of-defeat.mp3");
+    sound_diddy_cool = LoadSound("./resources/diddy-cool.mp3");
+    sound_diddy_of_defeat = LoadSound("./resources/diddy-of-defeat.mp3");
 
-    sound_select = LoadSound("src/resources/select-minus-half-step.mp3");
+    sound_select = LoadSound("./resources/select-minus-half-step.mp3");
     
-    sound_select_plus = LoadSound("src/resources/select-plus-half-step.mp3");
+    sound_select_plus = LoadSound("./resources/select-plus-half-step.mp3");
 
-    sound_select_minus = LoadSound("src/resources/select-minus-15-step.mp3");
+    sound_select_minus = LoadSound("./resources/select-minus-15-step.mp3");
 
-    sound_thump = LoadSound("src/resources/thump.mp3");
+    sound_thump = LoadSound("./resources/thump.mp3");
 
 
     
