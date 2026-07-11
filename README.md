@@ -70,14 +70,10 @@ Merging clocks changes their tick rate.
 
 ### Controls
 
-Keyboard:
- - $(Game Control 01)
- - $(Game Control 02)
- - $(Game Control 03)
-
-### Screenshots
-
-_TODO: Show your game to the world, animated GIFs recommended!._
+Mouse:
+- select and merge
+Spacebar:
+- start next level
 
 ### Developers
 
@@ -95,4 +91,4 @@ This project sources are licensed under an unmodified zlib/libpng license, which
 
 $(Additional Licenses)
 
-*Copyright (c) $(Year) $(User Name) ($(User Twitter/GitHub Name))*
+*Copyright (c) 2026 Dan Simonson (thedansimonson)*
