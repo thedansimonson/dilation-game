@@ -256,6 +256,8 @@ void UpdateDrawFrame(void)
             GRIDPOS_Y = screenHeight/2;// - tile_probe.y + cell_height/2; // NEEDS HALF HEIGHT OFFSET
         } // */
 
+        GRIDPOS_X -= 10;
+
         game_state = LEVEL_ACTIVE;
         round_score = active_grid.num_qs * active_grid.num_rs * 1000;
         start_score = false;
@@ -372,7 +374,7 @@ void UpdateDrawFrame_ActiveLevel(void)
 
     //advance_tile(&test_tile);
     update_grid(&active_grid);
-    if (count_active_tiles(&active_grid) == 1)
+    if (count_active_tiles(&active_grid) == 1) //|| IsKeyPressed(KEY_L))
     {
         total_score += round_score;
         game_state = LEVEL_SUCCESS;
