@@ -52,6 +52,19 @@ void update_grid(Grid *grid)
     }
 }
 
+Vector2 probe_tile_pos(Grid *grid, int i, int j, int width)
+{
+    const float cell_width = width / grid->num_qs;
+    const float cw2 = cell_width / 2;
+    const float cell_height = cell_width * 2 / SQRT_3;
+    const float ch34 = cell_height * 3 / 4;
+    
+    Vector2 tile_pos = { 0 };
+    tile_pos = (Vector2) { i*cell_width + j*cw2, 
+                           j*ch34 };
+    return tile_pos;
+}
+
 void draw_grid(Grid *grid, int pos_x, int pos_y, int width)
 {
     // since "height" is indirectly determined by width @ grid size,

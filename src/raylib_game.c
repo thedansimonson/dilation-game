@@ -56,8 +56,8 @@ static RenderTexture2D target = { 0 };  // Render texture to render our game
 
 static Grid active_grid = { 0 };
 static Tile test_tile = (Tile) {60, 2, 10, true, OP_ADD, false};
-static const int GRIDPOS_X = 100;
-static const int GRIDPOS_Y = 200;
+static int GRIDPOS_X = 125;
+static int GRIDPOS_Y = 200;
 
 // UI-related funcs
 static Tile* selected_tile = NULL;
@@ -228,10 +228,39 @@ void UpdateDrawFrame(void)
 
             }
         }
+        // update the grid location to center it
+        /* // Last minute attempt at centering
+        if (level_counter % 2 == 1)
+        {
+            int check_i = ((int) (new_level_size / 2) );
+            Vector2 tile_probe = probe_tile_pos(&active_grid, check_i, check_i, GRIDSIZE);
+            printf("Tile probe of %i (nls %i): < %f %f >\n", 
+                    check_i, new_level_size, tile_probe.x, tile_probe.y);
+            GRIDPOS_X = 720/2 - tile_probe.x;
+            GRIDPOS_Y = 720/2 - tile_probe.y;
+        }
+        else
+        {
+            int check_i = (int) (new_level_size / 2);
+            Vector2 tile_probe = probe_tile_pos(&active_grid, check_i, check_i, GRIDSIZE);
+            printf("Tile probe of %i (nls %i): < %f %f >\n", 
+                    check_i, new_level_size, tile_probe.x, tile_probe.y);
+
+            // janky -- copied and pasted, last minute tweak
+            const float cell_width = GRIDSIZE / active_grid.num_qs;
+            const float cw2 = cell_width / 2;
+            const float cell_height = cell_width * 2 / SQRT_3;
+            const float ch34 = cell_height * 3 / 4;
+
+            GRIDPOS_X = screenWidth/2 - tile_probe.x + cw2; // NEEDS HALF WIDTH OFFSET
+            GRIDPOS_Y = screenHeight/2;// - tile_probe.y + cell_height/2; // NEEDS HALF HEIGHT OFFSET
+        } // */
+
         game_state = LEVEL_ACTIVE;
         round_score = active_grid.num_qs * active_grid.num_rs * 1000;
         start_score = false;
         level_counter++;
+        
     }
     if (game_state == LEVEL_SUCCESS || game_state == GAME_OVER || game_state == GAME_WIN) 
         UpdateDrawFrame_BetweenLevels();

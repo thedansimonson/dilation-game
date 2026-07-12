@@ -73,6 +73,7 @@ typedef struct Level {
 void init_grid(Grid *);
 void free_grid(Grid *);
 void update_grid(Grid *);
+Vector2 probe_tile_pos(Grid*, int, int, int);
 void draw_grid(Grid *, int, int, int);
 AxCoord pixel_to_pointy(PixelCoord, Grid *, float);
 CubicCoord axial_to_cube(AxCoord);
