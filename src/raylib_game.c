@@ -538,12 +538,13 @@ void UpdateDrawFrame_BetweenLevels(void)
             if (game_state == GAME_WIN)
                 DrawText("Press [Space] to continue!", 20, screenHeight/2 + 60, 20, YELLOW);
 
-
-            if (!defeat_music_played)
-            {
-                PlaySound(sound_diddy_of_defeat);
-                defeat_music_played = true;
-            }
+            
+            if (game_state == GAME_OVER)
+                if (!defeat_music_played)
+                {
+                    PlaySound(sound_diddy_of_defeat);
+                    defeat_music_played = true;
+                }
         }
         else
         {
