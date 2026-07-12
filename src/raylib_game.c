@@ -101,6 +101,9 @@ static Sound sound_thump;
 #define GAME_OVER 4
 #define TUTORIAL 5
 #define SPLASH_SCREEN 6
+#define GAME_WIN 7
+
+#define WIN_LEVEL 4
 
 static int game_state = NEW_GAME;
 
@@ -230,7 +233,7 @@ void UpdateDrawFrame(void)
         start_score = false;
         level_counter++;
     }
-    if (game_state == LEVEL_SUCCESS || game_state == GAME_OVER) 
+    if (game_state == LEVEL_SUCCESS || game_state == GAME_OVER || game_state == GAME_WIN) 
         UpdateDrawFrame_BetweenLevels();
     else if (game_state == SPLASH_SCREEN)
         UpdateDrawFrame_SplashScreen();
@@ -344,11 +347,12 @@ void UpdateDrawFrame_ActiveLevel(void)
     {
         total_score += round_score;
         game_state = LEVEL_SUCCESS;
+        if (level_counter == WIN_LEVEL) game_state = GAME_WIN;
     }
     
     isolated_cells = check_fail_condition(&active_grid) != 0;
     too_long = round_score <= 0;
-    if ((too_long || isolated_cells) && game_state != LEVEL_SUCCESS)
+    if ((too_long || isolated_cells) && game_state != LEVEL_SUCCESS && game_state != GAME_WIN)
     {
         round_score = 0;
         game_state = GAME_OVER;
@@ -463,6 +467,9 @@ void UpdateDrawFrame_BetweenLevels(void)
             case GAME_OVER:
                 game_state = NEW_GAME;
                 break;
+            case GAME_WIN:
+                game_state = LEVEL_NEW;
+                break;
         }
     }
     
@@ -480,13 +487,26 @@ void UpdateDrawFrame_BetweenLevels(void)
         DrawText(TextFormat("Total Score: %i", total_score), 
                             screenWidth / 2, screenHeight / 2 + 30, 20, PALEYELLOW);
 
-        if (game_state == GAME_OVER)
+        if (game_state == GAME_OVER || game_state == GAME_WIN)
         {
-            DrawText("Game over.", 20, 200, 100, YELLOW);
-            if (too_long) DrawText("You were too slow...", 20, 300, 20, PALEYELLOW);
-            if (isolated_cells) 
-                DrawText("You created an unsolvable situation...", 20, 300, 20, PALEYELLOW);
-            DrawText("Press [Space] to begin again!", 20, screenHeight/2 + 60, 20, YELLOW);
+            if (game_state == GAME_OVER)
+                DrawText("Game over.", 20, 200, 100, YELLOW);
+            if (game_state == GAME_WIN)
+                DrawText("You win!", 20, 200, 100, PURPLE);
+            
+            if (game_state == GAME_OVER)
+            {
+                if (too_long) DrawText("You were too slow...", 20, 300, 20, PALEYELLOW);
+                if (isolated_cells) 
+                    DrawText("You created an unsolvable situation...", 
+                             20, 300, 20, PALEYELLOW);
+            }
+
+            if (game_state == GAME_OVER)
+                DrawText("Press [Space] to begin again!", 20, screenHeight/2 + 60, 20, YELLOW);
+            if (game_state == GAME_WIN)
+                DrawText("Press [Space] to continue!", 20, screenHeight/2 + 60, 20, YELLOW);
+
 
             if (!defeat_music_played)
             {
@@ -515,3 +535,5 @@ void UpdateDrawFrame_BetweenLevels(void)
     EndDrawing();
     //----------------------------------------------------------------------------------  
 }
+
+
